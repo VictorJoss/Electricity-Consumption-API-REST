@@ -42,4 +42,17 @@ public class ConsumptionController {
             return ResponseEntity.internalServerError().build();
         }
     }
+
+    @GetMapping("/monthly")
+    public ResponseEntity<Map<String, Double>> getMonthlyConsumption(@RequestBody RequestData requestData) {
+
+        try {
+            if (requestData.getPeriod().equalsIgnoreCase("monthly")) {
+                return ResponseEntity.ok(consumptionService.getConsumptionByMonth(requestData.getDate()));
+            }
+            return ResponseEntity.badRequest().build();
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
 }
