@@ -10,4 +10,5 @@ public interface IConsumptionService {
     List<ElectricityConsumption> findAll();
     Map<String, Double> getConsumptionByDate(String meterDate);
     Map<String, Double> getConsumptionByMonth(String meterDate);
+    Map<String, Double> getConsumptionByWeek(String meterDate);
 }

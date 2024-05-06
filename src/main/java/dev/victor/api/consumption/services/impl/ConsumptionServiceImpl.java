@@ -6,8 +6,10 @@ import dev.victor.api.consumption.services.IConsumptionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.stream.IntStream;
 
@@ -61,6 +63,20 @@ public class ConsumptionServiceImpl implements IConsumptionService {
 
         IntStream.rangeClosed(0, (int) ChronoUnit.DAYS.between(startOfMonth, endOfMonth))
                 .mapToObj(startOfMonth::plusDays)
+                .forEach(date -> getConsumptionByDay(date.toString(), consumptionPerDays));
+
+        return consumptionPerDays;
+    }
+
+    @Override
+    public Map<String, Double> getConsumptionByWeek(String meterDate) {
+        SortedMap<String, Double> consumptionPerDays = new TreeMap<>();
+
+        LocalDate startDate = LocalDate.parse(meterDate);
+        LocalDate startOfWeek = startDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+
+        IntStream.range(0, 7)
+                .mapToObj(startOfWeek::plusDays)
                 .forEach(date -> getConsumptionByDay(date.toString(), consumptionPerDays));
 
         return consumptionPerDays;
