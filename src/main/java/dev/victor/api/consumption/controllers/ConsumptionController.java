@@ -55,4 +55,17 @@ public class ConsumptionController {
             return ResponseEntity.internalServerError().build();
         }
     }
+
+    @GetMapping("/weekly")
+    public ResponseEntity<Map<String, Double>> getWeeklyConsumption(@RequestBody RequestData requestData) {
+
+        try {
+            if (requestData.getPeriod().equalsIgnoreCase("weekly")) {
+                return ResponseEntity.ok(consumptionService.getConsumptionByWeek(requestData.getDate()));
+            }
+            return ResponseEntity.badRequest().build();
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
 }
