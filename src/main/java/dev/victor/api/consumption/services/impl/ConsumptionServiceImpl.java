@@ -6,10 +6,9 @@ import dev.victor.api.consumption.services.IConsumptionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
 import java.util.stream.IntStream;
 
 @Service
@@ -50,5 +49,32 @@ public class ConsumptionServiceImpl implements IConsumptionService {
                 });
 
         return consumptionPerHour;
+    }
+
+    @Override
+    public Map<String, Double> getConsumptionByMonth(String meterDate) {
+        SortedMap<String, Double> consumptionPerDays = new TreeMap<>();
+
+        LocalDate startDate = LocalDate.parse(meterDate);
+        LocalDate startOfMonth = startDate.withDayOfMonth(1);
+        LocalDate endOfMonth = startDate.withDayOfMonth(startDate.lengthOfMonth());
+
+        IntStream.rangeClosed(0, (int) ChronoUnit.DAYS.between(startOfMonth, endOfMonth))
+                .mapToObj(startOfMonth::plusDays)
+                .forEach(date -> getConsumptionByDay(date.toString(), consumptionPerDays));
+
+        return consumptionPerDays;
+    }
+
+    private void getConsumptionByDay(String meterDate, SortedMap<String, Double> map) {
+        List<ElectricityConsumption> consumptionsPerDay = Optional.ofNullable(consumptionRepository
+                .findByMeterDate(meterDate)).orElse(Collections.emptyList());
+
+        DoubleSummaryStatistics stats = consumptionsPerDay.stream()
+                .mapToDouble(ElectricityConsumption::getActiveEnergy)
+                .summaryStatistics();
+
+        Double consumptionPerDay = stats.getMax() - stats.getMin();
+        map.put(meterDate, consumptionPerDay);
     }
 }
